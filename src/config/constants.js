@@ -21,7 +21,7 @@ export const ROLES = {
 };
 
 // Base URL for the API
-export const API_BASE_URL = import.meta.env.NEXT_API_URL;
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
 
 // API Endpoints
 export const API_ENDPOINTS = {
