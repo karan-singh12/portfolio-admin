@@ -1,0 +1,70 @@
+.logo-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-container.auth {
+  margin-bottom: 1.5rem;
+}
+
+.logo-container.default {
+  width: 100%;
+}
+
+.logo-image-wrapper {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-container.default .logo-image-wrapper {
+  cursor: pointer;
+}
+
+.logo-container.default .logo-image-wrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.logo-container.auth .logo-image-wrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.logo-fallback {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.logo-container.default .logo-fallback {
+  cursor: pointer;
+}
+
+.logo-container.default .logo-fallback:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.logo-container.auth .logo-fallback:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.logo-image {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-image-wrapper:hover .logo-image {
+  transform: scale(1.02);
+}
+
+.logo-text {
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.logo-container.default .logo-text {
+  color: var(--sidebar-text);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
