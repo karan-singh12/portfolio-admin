@@ -7,6 +7,7 @@ import { showNotification } from '@mantine/notifications';
 import { AllServices } from '@/services/AllServices';
 import { updateUser } from '@/store/slices/authSlice';
 import { IconFileCv } from '@tabler/icons-react';
+import { BASE_URL } from '@/config/constants';
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -72,7 +73,7 @@ const Profile = () => {
             <Avatar 
                 size={120} 
                 color="primary" 
-                src={avatarPreview || (user?.avatarUrl ? `http://localhost:5001${user.avatarUrl}` : null)}
+                src={avatarPreview || (user?.avatarUrl ? `${BASE_URL}${user.avatarUrl}` : null)}
             >
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </Avatar>

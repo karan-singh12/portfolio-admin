@@ -20,8 +20,11 @@ export const ROLES = {
   USER: 'user',
 };
 
+// Host URL for assets and base API
+export const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:5001';
+
 // Base URL for the API
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+export const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 // API Endpoints
 export const API_ENDPOINTS = {
