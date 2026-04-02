@@ -28,6 +28,11 @@ const ExperienceList = lazy(() => import('@/pages/experience/ExperienceList'));
 const ExperienceAdd = lazy(() => import('@/pages/experience/ExperienceAdd'));
 const ExperienceEdit = lazy(() => import('@/pages/experience/ExperienceEdit'));
 
+// Projects
+const ProjectList = lazy(() => import('@/pages/projects/ProjectList'));
+const ProjectAdd = lazy(() => import('@/pages/projects/ProjectAdd'));
+const ProjectEdit = lazy(() => import('@/pages/projects/ProjectEdit'));
+
 const AppRoutes = () => {
   return (
     <Suspense fallback={<LoadingSpinner />}>
@@ -152,6 +157,32 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <ExperienceEdit />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Project Management */}
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <ProjectList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/add"
+          element={
+            <ProtectedRoute>
+              <ProjectAdd />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/edit/:id"
+          element={
+            <ProtectedRoute>
+              <ProjectEdit />
             </ProtectedRoute>
           }
         />

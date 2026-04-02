@@ -207,6 +207,27 @@ export const AllServices = {
     update: (id, data) => api.post('/admin/experience/updateExperience', { ...data, id }),
     remove: id => api.post('/admin/experience/deleteExperience', { ids: [id] }),
   },
+
+  projects: {
+    list: (params = {}) => {
+      return api.post('/admin/project/getAllProjects', {
+        pageNumber: params.page || 1,
+        pageSize: params.pageSize || 10,
+        searchItem: params.search || '',
+        status: params.status,
+      }).then(res => ({
+        data: {
+          data: (res.data.data.result || []).map(item => ({ ...item, id: item._id })),
+          total: res.data.data.totalCount || 0
+        }
+      }));
+    },
+    getById: id => api.get(`/admin/project/getOneProject/${id}`).then(res => ({ data: { ...res.data.data, id: res.data.data._id } })),
+    create: data => api.post('/admin/project/addProject', data),
+    update: (id, data) => api.patch('/admin/project/updateProject', { ...data, id }),
+    remove: id => api.delete('/admin/project/deleteProjects', { data: { ids: [id] } }),
+    changeStatus: (id, status) => api.patch('/admin/project/changeProjectStatus', { id, status }),
+  },
 };
 
 export default AllServices;
