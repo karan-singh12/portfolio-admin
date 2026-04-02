@@ -2,7 +2,7 @@ import axios from 'axios';
 import { store } from '@/store';
 import { logoutUser, refreshToken } from '@/store/slices/authSlice';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { API_BASE_URL } from '@/config/constants';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

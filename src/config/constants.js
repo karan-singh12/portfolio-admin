@@ -20,21 +20,8 @@ export const ROLES = {
   USER: 'user',
 };
 
-// Environment modes
-export const ENVIRONMENTS = {
-  LOCAL: 'local',
-  STAGING: 'staging',
-  PRODUCTION: 'production',
-};
-
-// Current environment (defaults to LOCAL)
-export const APP_ENV =
-  import.meta.env.NEXT_API_URL || ENVIRONMENTS.LOCAL;
-
-// Base URLs per environment
-const BASE_URLS = import.meta.env.NEXT_API_URL;
-
-export const API_BASE_URL = BASE_URLS[APP_ENV];
+// Base URL for the API
+export const API_BASE_URL = import.meta.env.NEXT_API_URL;
 
 // API Endpoints
 export const API_ENDPOINTS = {
