@@ -17,6 +17,7 @@ import {
   Divider,
   LoadingOverlay,
   Box,
+  SimpleGrid,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { 
@@ -46,6 +47,8 @@ const ProjectEdit = () => {
         href: '',
       },
       status: 'active',
+      whatIDid: '',
+      images: [],
     },
     validate: {
       title: (value) => (value.length < 1 ? 'Title is required' : null),
@@ -71,6 +74,8 @@ const ProjectEdit = () => {
               href: project.link?.href || '',
             },
             status: project.status || 'active',
+            whatIDid: project.whatIDid?.join('\n') || '',
+            images: project.images || [],
           });
         }
       } catch (error) {
@@ -102,10 +107,29 @@ const ProjectEdit = () => {
     }
   };
 
+  const handleGalleryUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    try {
+      const promises = files.map(file => convertImageToBase64(file));
+      const base64s = await Promise.all(promises);
+      form.setFieldValue('images', [...form.values.images, ...base64s]);
+    } catch (error) {
+      showNotification({
+        title: 'Error',
+        message: 'Failed to upload gallery images',
+        color: 'red',
+      });
+    }
+  };
+
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      await AllServices.projects.update(id, values);
+      const payload = {
+        ...values,
+        whatIDid: values.whatIDid.split('\n').filter(line => line.trim() !== ''),
+      };
+      await AllServices.projects.update(id, payload);
       showNotification({
         title: 'Success',
         message: 'Project updated successfully',
@@ -233,6 +257,73 @@ const ProjectEdit = () => {
                     minRows={4}
                     {...form.getInputProps('description')}
                   />
+
+                  <Textarea
+                    label="What I Did (one point per line)"
+                    placeholder="Designed the UI in Figma&#10;Implemented backend with Node.js&#10;Optimized database queries"
+                    minRows={4}
+                    {...form.getInputProps('whatIDid')}
+                  />
+
+                  <Divider label="Project Gallery" labelPosition="center" />
+                  <Stack gap="sm">
+                    <Group justify="space-between">
+                      <Text size="sm" fw={500}>Gallery Images</Text>
+                      <FileButton onChange={handleGalleryUpload} accept="image/*" multiple>
+                        {(props) => (
+                          <Button {...props} variant="light" size="xs" leftSection={<IconUpload size={14} />}>
+                            Add Images
+                          </Button>
+                        )}
+                      </FileButton>
+                    </Group>
+                    
+                    <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
+                      {form.values.images.map((img, index) => (
+                        <Paper 
+                          key={index}
+                          withBorder 
+                          style={{ 
+                            position: 'relative',
+                            aspectRatio: '1/1',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <Image src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <ActionIcon 
+                            color="red" 
+                            variant="filled" 
+                            style={{ position: 'absolute', top: 5, right: 5 }}
+                            onClick={() => {
+                              const newImages = [...form.values.images];
+                              newImages.splice(index, 1);
+                              form.setFieldValue('images', newImages);
+                            }}
+                          >
+                            <IconTrash size={14} />
+                          </ActionIcon>
+                        </Paper>
+                      ))}
+                      {form.values.images.length === 0 && (
+                        <Paper 
+                          withBorder 
+                          p="xl"
+                          style={{ 
+                            gridColumn: '1 / -1',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: 120,
+                            borderStyle: 'dashed'
+                          }}
+                        >
+                          <IconPhoto size={30} color="var(--text-muted)" />
+                          <Text size="xs" c="dimmed" mt={5}>No gallery images added</Text>
+                        </Paper>
+                      )}
+                    </SimpleGrid>
+                  </Stack>
 
                   <Divider label="External Link" labelPosition="center" />
                   
