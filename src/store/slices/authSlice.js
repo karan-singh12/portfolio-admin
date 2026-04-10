@@ -46,22 +46,28 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   return null;
 });
 
-export const checkAuth = createAsyncThunk('auth/checkAuth', async () => {
+export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWithValue }) => {
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-  if (token && userStr) {
-    try {
-      return {
-        token,
-        user: JSON.parse(userStr),
-      };
-    } catch (e) {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      return null;
-    }
+  if (!token) return null;
+
+  try {
+    // Fetch fresh user details from the server to ensure we're in sync
+    const response = await AllServices.auth.getAdminDetails();
+    const freshUser = response.data.data;
+    
+    // Update localStorage with fresh data
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(freshUser));
+    
+    return {
+      token,
+      user: freshUser,
+    };
+  } catch (error) {
+    // If token is invalid or request fails, clear everything
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    return null;
   }
-  return null;
 });
 
 const initialState = {

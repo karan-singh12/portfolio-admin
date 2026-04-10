@@ -21,6 +21,7 @@ import { setTheme } from '@/store/slices/themeSlice';
 import { showNotification } from '@mantine/notifications';
 import { THEMES } from '@/config/constants';
 import { BRANDING } from '@/config/branding';
+import { getImageUrl } from '@/utils/helpers';
 
 const AppNavbar = () => {
   const navigate = useNavigate();
@@ -77,7 +78,11 @@ const AppNavbar = () => {
           <Menu shadow="md" width={200}>
             <Menu.Target>
               <Group style={{ cursor: 'pointer' }}>
-                <Avatar color="primary" radius="xl">
+                <Avatar 
+                  color="primary" 
+                  radius="xl"
+                  src={getImageUrl(user?.avatarUrl)}
+                >
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </Avatar>
                 <div>
