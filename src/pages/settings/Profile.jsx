@@ -33,7 +33,7 @@ const Profile = () => {
       formData.append('name', values.name);
       formData.append('email', values.email);
       formData.append('phoneNumber', values.phoneNumber);
-      
+
       if (resumeFile) {
         formData.append('resume', resumeFile);
       }
@@ -42,7 +42,7 @@ const Profile = () => {
       }
 
       const response = await AllServices.auth.updateProfile(formData);
-      
+
       if (response.data.status === 200) {
         dispatch(updateUser(response.data.data));
         showNotification({
@@ -71,10 +71,10 @@ const Profile = () => {
         <Title order={1}>Profile Settings</Title>
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Stack gap="md" align="center" mb="md">
-            <Avatar 
-                size={120} 
-                color="primary" 
-                src={avatarPreview || getImageUrl(user?.avatarUrl)}
+            <Avatar
+              size={120}
+              color="primary"
+              src={avatarPreview || getImageUrl(user?.avatarUrl)}
             >
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </Avatar>
@@ -85,26 +85,26 @@ const Profile = () => {
               <TextInput label="Full Name" required {...form.getInputProps('name')} />
               <TextInput label="Email Address" required type="email" {...form.getInputProps('email')} />
               <TextInput label="Phone Number" {...form.getInputProps('phoneNumber')} />
-              
-              <FileInput 
-                label="Profile Photo" 
-                placeholder="Upload new avatar" 
+
+              <FileInput
+                label="Profile Photo"
+                placeholder="Upload new avatar"
                 accept="image/png,image/jpeg"
                 onChange={(file) => {
-                    setAvatarFile(file);
-                    if (file) {
-                        setAvatarPreview(URL.createObjectURL(file));
-                    } else {
-                        setAvatarPreview(null);
-                    }
+                  setAvatarFile(file);
+                  if (file) {
+                    setAvatarPreview(URL.createObjectURL(file));
+                  } else {
+                    setAvatarPreview(null);
+                  }
                 }}
                 value={avatarFile}
                 clearable
               />
 
-              <FileInput 
-                label="Resume (PDF)" 
-                placeholder="Upload your CV" 
+              <FileInput
+                label="Resume (PDF)"
+                placeholder="Upload your CV"
                 accept="application/pdf"
                 leftSection={<IconFileCv size={18} />}
                 onChange={setResumeFile}
@@ -127,4 +127,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

@@ -45,7 +45,7 @@ const BlogAdd = () => {
       author: 'Admin',
       status: 'active',
       sections: [
-        { id: Date.now(), type: 'text', title: '', subtitle: '', content: '' }
+        { id: Date.now(), type: 'text', title: '', subtitle: '', content: '', points: [] }
       ],
     },
     validate: {
@@ -88,7 +88,27 @@ const BlogAdd = () => {
       title: '',
       subtitle: '',
       content: '',
+      points: [],
     });
+  };
+
+  const addPoint = (sectionIndex) => {
+    const current = form.values.sections[sectionIndex].points || [];
+    form.setFieldValue(`sections.${sectionIndex}.points`, [...current, '']);
+  };
+
+  const removePoint = (sectionIndex, pointIndex) => {
+    const current = form.values.sections[sectionIndex].points || [];
+    form.setFieldValue(
+      `sections.${sectionIndex}.points`,
+      current.filter((_, i) => i !== pointIndex)
+    );
+  };
+
+  const updatePoint = (sectionIndex, pointIndex, value) => {
+    const current = [...(form.values.sections[sectionIndex].points || [])];
+    current[pointIndex] = value;
+    form.setFieldValue(`sections.${sectionIndex}.points`, current);
   };
 
   const removeSection = (index) => {
@@ -304,13 +324,55 @@ const BlogAdd = () => {
                     </Group>
 
                     {section.type === 'text' ? (
-                      <Textarea
-                        label="Content"
-                        placeholder="Enter text content here..."
-                        minRows={4}
-                        autosize
-                        {...form.getInputProps(`sections.${index}.content`)}
-                      />
+                      <Stack gap="md">
+                        <Textarea
+                          label="Content"
+                          placeholder="Write paragraph content for this section..."
+                          description="Free-form paragraph text shown above the bullet points"
+                          minRows={3}
+                          autosize
+                          {...form.getInputProps(`sections.${index}.content`)}
+                        />
+
+                        <Stack gap="xs">
+                          <Group justify="space-between" align="center">
+                            <Text size="sm" fw={500}>Points <Text span c="dimmed" size="xs">(Optional bullet list)</Text></Text>
+                            <Button
+                              size="xs"
+                              variant="light"
+                              leftSection={<IconPlus size={12} />}
+                              onClick={() => addPoint(index)}
+                            >
+                              Add Point
+                            </Button>
+                          </Group>
+
+                          {(section.points || []).length === 0 && (
+                            <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                              No points added yet. Click "Add Point" to create bullet points.
+                            </Text>
+                          )}
+
+                          {(section.points || []).map((point, pIdx) => (
+                            <Group key={pIdx} gap="xs" align="center">
+                              <Text size="sm" c="dimmed" style={{ minWidth: 20 }}>•</Text>
+                              <TextInput
+                                style={{ flex: 1 }}
+                                placeholder={`Point ${pIdx + 1}...`}
+                                value={point}
+                                onChange={(e) => updatePoint(index, pIdx, e.target.value)}
+                              />
+                              <ActionIcon
+                                color="red"
+                                variant="subtle"
+                                onClick={() => removePoint(index, pIdx)}
+                              >
+                                <IconTrash size={14} />
+                              </ActionIcon>
+                            </Group>
+                          ))}
+                        </Stack>
+                      </Stack>
                     ) : (
                       <Stack gap="xs" align="center">
                         <Paper 
