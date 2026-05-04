@@ -1,25 +1,23 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Group,
-  Button,
   Text,
   Menu,
   Avatar,
-  Badge,
   ActionIcon,
-  useMantineColorScheme,
+  Indicator,
+  Divider,
 } from '@mantine/core';
 import {
   IconLogout,
   IconUser,
   IconSettings,
+  IconBell,
+  IconChevronDown,
 } from '@tabler/icons-react';
 import { logoutUser } from '@/store/slices/authSlice';
-import { setTheme } from '@/store/slices/themeSlice';
 import { showNotification } from '@mantine/notifications';
-import { THEMES } from '@/config/constants';
 import { BRANDING } from '@/config/branding';
 import { getImageUrl } from '@/utils/helpers';
 
@@ -27,8 +25,9 @@ const AppNavbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { currentTheme } = useSelector((state) => state.theme);
-  const { toggleColorScheme } = useMantineColorScheme();
+
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -40,71 +39,120 @@ const AppNavbar = () => {
     navigate('/login');
   };
 
-  const handleThemeChange = (theme) => {
-    dispatch(setTheme(theme));
-    const darkThemes = ['dark', 'dark_pro', 'midnight_blue'];
-    if (darkThemes.includes(theme)) {
-      toggleColorScheme();
-    }
-    showNotification({
-      title: '✨ Theme Changed',
-      message: `Switched to theme: ${theme}`,
-      color: 'green',
-      autoClose: 2000,
-    });
-  };
-
   return (
     <div
       style={{
         height: '100%',
-        padding: '1rem',
+        paddingInline: '1.5rem',
         backgroundColor: 'var(--navbar-bg)',
         borderBottom: '1px solid var(--border-color)',
-        boxShadow: '0 2px 4px var(--navbar-shadow)',
+        boxShadow: '0 1px 3px var(--navbar-shadow)',
         display: 'flex',
         alignItems: 'center',
       }}
     >
       <Group justify="space-between" style={{ width: '100%' }}>
-        <Group>
-          <Text fw={600} size="lg" c="var(--primary-color)">
+        {/* Left — Brand */}
+        <Group gap="xs">
+          <Text
+            fw={700}
+            size="md"
+            style={{
+              background: 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.3px',
+            }}
+          >
             {BRANDING.FULL_NAME}
+          </Text>
+          <Text size="xs" c="dimmed" style={{ fontWeight: 400 }}>
+            / Admin
           </Text>
         </Group>
 
-        <Group>
+        {/* Right — Actions + User */}
+        <Group gap="sm">
+          {/* Date chip */}
+          <Text
+            size="xs"
+            c="dimmed"
+            style={{
+              padding: '4px 10px',
+              borderRadius: '999px',
+              background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-color)',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            📅 {dateLabel}
+          </Text>
+
+          {/* Notification Bell */}
+          <Indicator color="red" size={7} offset={3} processing>
+            <ActionIcon
+              variant="subtle"
+              radius="xl"
+              size="lg"
+              color="gray"
+              onClick={() => showNotification({ title: '🔔 No new notifications', message: "You're all caught up!", color: 'gray', autoClose: 2000 })}
+            >
+              <IconBell size={18} />
+            </ActionIcon>
+          </Indicator>
+
+          <Divider orientation="vertical" style={{ height: 24, alignSelf: 'center' }} />
+
           {/* User Menu */}
-          <Menu shadow="md" width={200}>
+          <Menu shadow="lg" width={210} radius="md" position="bottom-end">
             <Menu.Target>
-              <Group style={{ cursor: 'pointer' }}>
-                <Avatar 
-                  color="primary" 
+              <Group
+                gap="xs"
+                style={{
+                  cursor: 'pointer',
+                  padding: '6px 10px',
+                  borderRadius: '10px',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-tertiary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <Avatar
+                  color="orange"
                   radius="xl"
+                  size="sm"
                   src={getImageUrl(user?.avatarUrl)}
+                  style={{ border: '2px solid var(--primary-color)' }}
                 >
                   {user?.name?.charAt(0).toUpperCase() || 'U'}
                 </Avatar>
-                <div>
-                  <Text size="sm" fw={500}>
+                <div style={{ lineHeight: 1.2 }}>
+                  <Text size="sm" fw={600} style={{ color: 'var(--text-dark)' }}>
                     {user?.name || 'User'}
                   </Text>
-                  <Text size="xs" c="dimmed">
-                    {user?.role || 'Role'}
+                  <Text size="xs" c="dimmed" style={{ textTransform: 'capitalize' }}>
+                    {user?.role || 'admin'}
                   </Text>
                 </div>
+                <IconChevronDown size={14} style={{ color: 'var(--text-muted)', marginLeft: 2 }} />
               </Group>
             </Menu.Target>
+
             <Menu.Dropdown>
-              <Menu.Label>Account</Menu.Label>
+              <Menu.Label style={{ fontSize: 11, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                Account
+              </Menu.Label>
               <Menu.Item
-                leftSection={<IconUser size={16} />}
+                leftSection={<IconUser size={15} />}
                 onClick={() => navigate('/settings/profile')}
               >
                 Profile
               </Menu.Item>
               <Menu.Item
-                leftSection={<IconSettings size={16} />}
+                leftSection={<IconSettings size={15} />}
                 onClick={() => navigate('/settings')}
               >
                 Settings
@@ -112,7 +160,7 @@ const AppNavbar = () => {
               <Menu.Divider />
               <Menu.Item
                 color="red"
-                leftSection={<IconLogout size={16} />}
+                leftSection={<IconLogout size={15} />}
                 onClick={handleLogout}
               >
                 Logout
@@ -126,4 +174,3 @@ const AppNavbar = () => {
 };
 
 export default AppNavbar;
-
