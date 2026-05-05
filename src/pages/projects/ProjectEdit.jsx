@@ -19,6 +19,7 @@ import {
   Box,
   SimpleGrid,
   ThemeIcon,
+  NumberInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
@@ -50,6 +51,7 @@ const ProjectEdit = () => {
         href: '',
       },
       status: 'active',
+      order: 0,
       whatIDid: [''],
       images: [],
     },
@@ -86,6 +88,7 @@ const ProjectEdit = () => {
               href: project.link?.href || '',
             },
             status: project.status || 'active',
+            order: project.order ?? 0,
             whatIDid: points,
             images: project.images || [],
           });
@@ -202,6 +205,13 @@ const ProjectEdit = () => {
                           { value: 'inactive', label: 'Inactive' },
                         ]}
                         {...form.getInputProps('status')}
+                      />
+                      <NumberInput
+                        label="Display Order"
+                        description="Lower number = shown first (0 = top)"
+                        placeholder="0"
+                        min={0}
+                        {...form.getInputProps('order')}
                       />
                     </Stack>
 

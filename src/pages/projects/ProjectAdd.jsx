@@ -17,6 +17,7 @@ import {
   Divider,
   SimpleGrid,
   ThemeIcon,
+  NumberInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
@@ -46,6 +47,7 @@ const ProjectAdd = () => {
         href: '',
       },
       status: 'active',
+      order: 0,
       whatIDid: [''],
       images: [],
     },
@@ -155,6 +157,13 @@ const ProjectAdd = () => {
                         { value: 'inactive', label: 'Inactive' },
                       ]}
                       {...form.getInputProps('status')}
+                    />
+                    <NumberInput
+                      label="Display Order"
+                      description="Lower number = shown first (0 = top)"
+                      placeholder="0"
+                      min={0}
+                      {...form.getInputProps('order')}
                     />
                   </Stack>
 
