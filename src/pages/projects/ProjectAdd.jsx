@@ -16,12 +16,15 @@ import {
   Select,
   Divider,
   SimpleGrid,
+  ThemeIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { 
-  IconTrash, 
-  IconUpload, 
-  IconPhoto
+import {
+  IconTrash,
+  IconUpload,
+  IconPhoto,
+  IconPlus,
+  IconGripVertical,
 } from '@tabler/icons-react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { AllServices } from '@/services/AllServices';
@@ -43,7 +46,7 @@ const ProjectAdd = () => {
         href: '',
       },
       status: 'active',
-      whatIDid: '',
+      whatIDid: [''],
       images: [],
     },
     validate: {
@@ -53,55 +56,56 @@ const ProjectAdd = () => {
     },
   });
 
+  // ── whatIDid helpers ──────────────────────────────────────
+  const addPoint = () => {
+    form.setFieldValue('whatIDid', [...form.values.whatIDid, '']);
+  };
+
+  const removePoint = (index) => {
+    const updated = form.values.whatIDid.filter((_, i) => i !== index);
+    form.setFieldValue('whatIDid', updated.length > 0 ? updated : ['']);
+  };
+
+  const updatePoint = (index, value) => {
+    const updated = [...form.values.whatIDid];
+    updated[index] = value;
+    form.setFieldValue('whatIDid', updated);
+  };
+
+  // ── image helpers ─────────────────────────────────────────
   const handleThumbnailUpload = async (file) => {
     if (!file) return;
     try {
       const base64 = await convertImageToBase64(file);
       form.setFieldValue('thumbnail', base64);
-    } catch (error) {
-      showNotification({
-        title: 'Error',
-        message: 'Failed to upload thumbnail',
-        color: 'red',
-      });
+    } catch {
+      showNotification({ title: 'Error', message: 'Failed to upload thumbnail', color: 'red' });
     }
   };
 
   const handleGalleryUpload = async (files) => {
     if (!files || files.length === 0) return;
     try {
-      const promises = files.map(file => convertImageToBase64(file));
-      const base64s = await Promise.all(promises);
+      const base64s = await Promise.all(files.map((f) => convertImageToBase64(f)));
       form.setFieldValue('images', [...form.values.images, ...base64s]);
-    } catch (error) {
-      showNotification({
-        title: 'Error',
-        message: 'Failed to upload gallery images',
-        color: 'red',
-      });
+    } catch {
+      showNotification({ title: 'Error', message: 'Failed to upload gallery images', color: 'red' });
     }
   };
 
+  // ── submit ────────────────────────────────────────────────
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
       const payload = {
         ...values,
-        whatIDid: values.whatIDid.split('\n').filter(line => line.trim() !== ''),
+        whatIDid: values.whatIDid.filter((p) => p.trim() !== ''),
       };
       await AllServices.projects.create(payload);
-      showNotification({
-        title: 'Success',
-        message: 'Project created successfully',
-        color: 'green',
-      });
+      showNotification({ title: 'Success', message: 'Project created successfully', color: 'green' });
       navigate('/projects');
-    } catch (error) {
-      showNotification({
-        title: 'Error',
-        message: 'Failed to create project',
-        color: 'red',
-      });
+    } catch {
+      showNotification({ title: 'Error', message: 'Failed to create project', color: 'red' });
     } finally {
       setLoading(false);
     }
@@ -113,11 +117,9 @@ const ProjectAdd = () => {
         <Group justify="space-between">
           <Title order={1}>Add New Project</Title>
           <Group>
-            <Button variant="subtle" onClick={() => navigate('/projects')}>
-              Cancel
-            </Button>
-            <Button 
-              loading={loading} 
+            <Button variant="subtle" onClick={() => navigate('/projects')}>Cancel</Button>
+            <Button
+              loading={loading}
               onClick={() => form.onSubmit(handleSubmit)()}
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
@@ -142,15 +144,7 @@ const ProjectAdd = () => {
                     <Select
                       label="Category"
                       placeholder="Select category"
-                      data={[
-                        'Full Stack',
-                        'Frontend',
-                        'Backend',
-                        'Mobile',
-                        'AI/ML',
-                        'UI/UX',
-                        'Other',
-                      ]}
+                      data={['Full Stack', 'Frontend', 'Backend', 'Mobile', 'AI/ML', 'UI/UX', 'Other']}
                       searchable
                       {...form.getInputProps('category')}
                     />
@@ -166,24 +160,24 @@ const ProjectAdd = () => {
 
                   <Stack gap="xs" align="center" style={{ maxWidth: 300 }}>
                     <Text size="sm" fw={500}>Thumbnail</Text>
-                    <Paper 
-                      withBorder 
-                      style={{ 
-                        width: '100%', 
-                        height: 180, 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    <Paper
+                      withBorder
+                      style={{
+                        width: '100%',
+                        height: 180,
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         overflow: 'hidden',
-                        position: 'relative'
+                        position: 'relative',
                       }}
                     >
                       {form.values.thumbnail ? (
                         <>
                           <Image src={form.values.thumbnail} height={180} />
-                          <ActionIcon 
-                            color="red" 
-                            variant="filled" 
+                          <ActionIcon
+                            color="red"
+                            variant="filled"
                             style={{ position: 'absolute', top: 5, right: 5 }}
                             onClick={() => form.setFieldValue('thumbnail', null)}
                           >
@@ -215,12 +209,81 @@ const ProjectAdd = () => {
                   {...form.getInputProps('description')}
                 />
 
-                <Textarea
-                  label="What I Did (one point per line)"
-                  placeholder="Designed the UI in Figma&#10;Implemented backend with Node.js&#10;Optimized database queries"
-                  minRows={4}
-                  {...form.getInputProps('whatIDid')}
-                />
+                {/* ── Role & Responsibilities ── */}
+                <Divider label="Role & Responsibilities" labelPosition="center" />
+                <Stack gap="sm">
+                  <Group justify="space-between" align="center">
+                    <Text size="sm" fw={500} c="dimmed">
+                      Add each responsibility as a separate point. Each point can span multiple lines.
+                    </Text>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      leftSection={<IconPlus size={14} />}
+                      onClick={addPoint}
+                      style={{ color: 'var(--primary-color)' }}
+                    >
+                      Add Point
+                    </Button>
+                  </Group>
+
+                  {form.values.whatIDid.map((point, index) => (
+                    <Paper
+                      key={index}
+                      withBorder
+                      p="sm"
+                      radius="md"
+                      style={{ position: 'relative', backgroundColor: 'var(--bg-secondary)' }}
+                    >
+                      <Group align="flex-start" gap="xs" wrap="nowrap">
+                        <ThemeIcon
+                          size={28}
+                          radius="sm"
+                          variant="light"
+                          color="orange"
+                          style={{ marginTop: 2, flexShrink: 0 }}
+                        >
+                          <IconGripVertical size={14} />
+                        </ThemeIcon>
+                        <Textarea
+                          placeholder={`Point ${index + 1} — e.g., Designed and implemented the authentication module using JWT and refresh tokens...`}
+                          value={point}
+                          onChange={(e) => updatePoint(index, e.currentTarget.value)}
+                          minRows={2}
+                          autosize
+                          style={{ flex: 1 }}
+                          styles={{ input: { fontSize: '14px' } }}
+                        />
+                        <ActionIcon
+                          color="red"
+                          variant="subtle"
+                          onClick={() => removePoint(index)}
+                          style={{ marginTop: 2, flexShrink: 0 }}
+                          disabled={form.values.whatIDid.length === 1}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      </Group>
+                      <Text size="xs" c="dimmed" mt={4} ml={36}>
+                        Point {index + 1}
+                      </Text>
+                    </Paper>
+                  ))}
+
+                  <Button
+                    variant="dashed"
+                    fullWidth
+                    leftSection={<IconPlus size={16} />}
+                    onClick={addPoint}
+                    style={{
+                      border: '1.5px dashed var(--border-color)',
+                      color: 'var(--text-muted)',
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    Add Another Point
+                  </Button>
+                </Stack>
 
                 <Divider label="Project Gallery" labelPosition="center" />
                 <Stack gap="sm">
@@ -234,22 +297,18 @@ const ProjectAdd = () => {
                       )}
                     </FileButton>
                   </Group>
-                  
+
                   <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
                     {form.values.images.map((img, index) => (
-                      <Paper 
+                      <Paper
                         key={index}
-                        withBorder 
-                        style={{ 
-                          position: 'relative',
-                          aspectRatio: '1/1',
-                          overflow: 'hidden'
-                        }}
+                        withBorder
+                        style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden' }}
                       >
                         <Image src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <ActionIcon 
-                          color="red" 
-                          variant="filled" 
+                        <ActionIcon
+                          color="red"
+                          variant="filled"
                           style={{ position: 'absolute', top: 5, right: 5 }}
                           onClick={() => {
                             const newImages = [...form.values.images];
@@ -262,17 +321,17 @@ const ProjectAdd = () => {
                       </Paper>
                     ))}
                     {form.values.images.length === 0 && (
-                      <Paper 
-                        withBorder 
+                      <Paper
+                        withBorder
                         p="xl"
-                        style={{ 
+                        style={{
                           gridColumn: '1 / -1',
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
                           height: 120,
-                          borderStyle: 'dashed'
+                          borderStyle: 'dashed',
                         }}
                       >
                         <IconPhoto size={30} color="var(--text-muted)" />
@@ -283,7 +342,6 @@ const ProjectAdd = () => {
                 </Stack>
 
                 <Divider label="External Link" labelPosition="center" />
-                
                 <Group grow>
                   <TextInput
                     label="Link Button Text"
@@ -301,11 +359,9 @@ const ProjectAdd = () => {
             </Card>
 
             <Group justify="flex-end">
-              <Button variant="subtle" onClick={() => navigate('/projects')}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
+              <Button variant="subtle" onClick={() => navigate('/projects')}>Cancel</Button>
+              <Button
+                type="submit"
                 loading={loading}
                 style={{ backgroundColor: 'var(--primary-color)' }}
               >
