@@ -19,8 +19,8 @@ import { convertImageToBase64 } from '@/services/globalSettingsService';
 const newBlock = (type) => ({ id: Date.now() + Math.random(), type, value: type === 'points' ? [''] : '' });
 const newSection = () => ({ id: Date.now() + Math.random(), title: '', subheading: '', subtitle: '', contentBlocks: [newBlock('text')] });
 
-const BLOCK_COLORS = { text: 'blue', image: 'orange', points: 'green', code: 'violet' };
-const BLOCK_LABELS = { text: 'Paragraph', image: 'Image', points: 'Bullet List', code: 'Code' };
+const BLOCK_COLORS = { text: 'blue', subheading: 'cyan', image: 'orange', points: 'green', code: 'violet' };
+const BLOCK_LABELS = { text: 'Paragraph', subheading: 'Subheading', image: 'Image', points: 'Bullet List', code: 'Code' };
 
 // ─── component ───────────────────────────────────────────────────────────────
 const BlogAdd = () => {
@@ -219,6 +219,14 @@ const BlogAdd = () => {
                               />
                             )}
 
+                            {block.type === 'subheading' && (
+                              <TextInput
+                                placeholder="Write subheading..."
+                                value={block.value}
+                                onChange={(e) => updateBlockValue(si, bi, e.currentTarget.value)}
+                              />
+                            )}
+
                             {block.type === 'code' && (
                               <Textarea
                                 placeholder="Paste your code snippet here..."
@@ -292,6 +300,7 @@ const BlogAdd = () => {
                         <Menu.Dropdown>
                           <Menu.Label>Block Type</Menu.Label>
                           <Menu.Item leftSection={<IconTypography size={14} />} onClick={() => addBlock(si, 'text')}>Paragraph</Menu.Item>
+                          <Menu.Item leftSection={<IconTypography size={14} />} onClick={() => addBlock(si, 'subheading')}>Subheading</Menu.Item>
                           <Menu.Item leftSection={<IconPhoto size={14} />} onClick={() => addBlock(si, 'image')}>Image</Menu.Item>
                           <Menu.Item leftSection={<IconList size={14} />} onClick={() => addBlock(si, 'points')}>Bullet List</Menu.Item>
                           <Menu.Item leftSection={<IconCode size={14} />} onClick={() => addBlock(si, 'code')}>Code Block</Menu.Item>
