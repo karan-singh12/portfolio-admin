@@ -17,7 +17,7 @@ import { convertImageToBase64 } from '@/services/globalSettingsService';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 const newBlock = (type) => ({ id: Date.now() + Math.random(), type, value: type === 'points' ? [''] : '' });
-const newSection = () => ({ id: Date.now() + Math.random(), title: '', subtitle: '', contentBlocks: [newBlock('text')] });
+const newSection = () => ({ id: Date.now() + Math.random(), title: '', subheading: '', subtitle: '', contentBlocks: [newBlock('text')] });
 
 const BLOCK_COLORS = { text: 'blue', image: 'orange', points: 'green', code: 'violet' };
 const BLOCK_LABELS = { text: 'Paragraph', image: 'Image', points: 'Bullet List', code: 'Code' };
@@ -28,7 +28,12 @@ const BLOCK_LABELS = { text: 'Paragraph', image: 'Image', points: 'Bullet List',
  */
 const migrateSections = (sections = []) =>
   sections.map((sec) => {
-    if (sec.contentBlocks) return sec; // already new format
+    if (sec.contentBlocks) {
+      return {
+        ...sec,
+        subheading: sec.subheading || '',
+      };
+    }
     const blocks = [];
     if (sec.content) {
       const isImage = sec.content.startsWith('data:image') || sec.type === 'image';
@@ -43,6 +48,7 @@ const migrateSections = (sections = []) =>
     return {
       id: sec.id || Date.now() + Math.random(),
       title: sec.title || '',
+      subheading: sec.subheading || '',
       subtitle: sec.subtitle || '',
       contentBlocks: blocks.length ? blocks : [newBlock('text')],
     };
@@ -229,6 +235,7 @@ const BlogEdit = () => {
 
                     <Group grow>
                       <TextInput label="Section Title (Optional)" placeholder="e.g. Introduction" {...form.getInputProps(`sections.${si}.title`)} />
+                      <TextInput label="Section Subheading (Optional)" placeholder="Optional subheading" {...form.getInputProps(`sections.${si}.subheading`)} />
                       <TextInput label="Section Subtitle (Optional)" placeholder="Optional subtitle" {...form.getInputProps(`sections.${si}.subtitle`)} />
                     </Group>
 
