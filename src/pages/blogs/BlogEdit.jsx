@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Card, Title, Button, TextInput, Textarea, Stack, Group,
   Image, FileButton, Paper, Text, ActionIcon, Divider,
-  Select, Badge, Loader, Center, Menu,
+  Select, Badge, Loader, Center, Menu, Switch,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import {
@@ -11,12 +11,20 @@ import {
   IconTypography, IconPhoto, IconList, IconCode, IconArrowLeft,
 } from '@tabler/icons-react';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { formatCodeSnippet } from '@/utils/codeFormatter';
 import { AllServices } from '@/services/AllServices';
 import { showNotification } from '@mantine/notifications';
 import { convertImageToBase64 } from '@/services/globalSettingsService';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
-const newBlock = (type) => ({ id: Date.now() + Math.random(), type, value: type === 'points' ? [''] : '' });
+const newBlock = (type) => {
+  const block = { id: Date.now() + Math.random(), type, value: type === 'points' ? [''] : '' };
+  if (type === 'code') {
+    block.language = 'auto';
+    block.formatOnPaste = true;
+  }
+  return block;
+};
 const newSection = () => ({ id: Date.now() + Math.random(), title: '', subheading: '', subtitle: '', contentBlocks: [newBlock('text')] });
 
 const BLOCK_COLORS = { text: 'blue', subheading: 'cyan', image: 'orange', points: 'green', code: 'violet' };
@@ -276,14 +284,85 @@ const BlogEdit = () => {
                             )}
 
                             {block.type === 'code' && (
-                              <Textarea
-                                placeholder="Paste your code snippet here..."
-                                minRows={4}
-                                autosize
-                                styles={{ input: { fontFamily: 'monospace', fontSize: '13px' } }}
-                                value={block.value || ''}
-                                onChange={(e) => updateBlockValue(si, bi, e.currentTarget.value)}
-                              />
+                              <Stack gap="xs">
+                                <Group justify="space-between" align="center">
+                                  <Group gap="xs">
+                                    <Select
+                                      size="xs"
+                                      style={{ width: 130 }}
+                                      data={[
+                                        { value: 'auto', label: 'Auto Detect' },
+                                        { value: 'js', label: 'JavaScript' },
+                                        { value: 'html', label: 'HTML' },
+                                        { value: 'css', label: 'CSS' },
+                                        { value: 'json', label: 'JSON' },
+                                      ]}
+                                      value={block.language || 'auto'}
+                                      onChange={(val) => {
+                                        const blocks = [...form.values.sections[si].contentBlocks];
+                                        blocks[bi] = { ...blocks[bi], language: val };
+                                        form.setFieldValue(`sections.${si}.contentBlocks`, blocks);
+                                      }}
+                                    />
+                                    <Button
+                                      size="xs"
+                                      variant="light"
+                                      color="violet"
+                                      onClick={() => {
+                                        const formatted = formatCodeSnippet(block.value || '', block.language || 'auto');
+                                        updateBlockValue(si, bi, formatted);
+                                      }}
+                                    >
+                                      Format Code
+                                    </Button>
+                                  </Group>
+                                  <Switch
+                                    label="Format on Paste"
+                                    size="xs"
+                                    checked={block.formatOnPaste !== false}
+                                    onChange={(e) => {
+                                      const blocks = [...form.values.sections[si].contentBlocks];
+                                      blocks[bi] = { ...blocks[bi], formatOnPaste: e.currentTarget.checked };
+                                      form.setFieldValue(`sections.${si}.contentBlocks`, blocks);
+                                    }}
+                                  />
+                                </Group>
+                                <Textarea
+                                  placeholder="Paste your code snippet here..."
+                                  minRows={6}
+                                  autosize
+                                  styles={{ input: { fontFamily: 'monospace', fontSize: '13px' } }}
+                                  value={block.value || ''}
+                                  onChange={(e) => updateBlockValue(si, bi, e.currentTarget.value)}
+                                  onPaste={(e) => {
+                                    if (block.formatOnPaste !== false) {
+                                      const pastedText = e.clipboardData.getData('text');
+                                      if (pastedText) {
+                                        e.preventDefault();
+                                        const formatted = formatCodeSnippet(pastedText, block.language || 'auto');
+                                        const target = e.currentTarget;
+                                        const selectionStart = target.selectionStart;
+                                        const selectionEnd = target.selectionEnd;
+                                        const currentValue = block.value || '';
+                                        
+                                        const newValue = currentValue.substring(0, selectionStart) + 
+                                                         formatted + 
+                                                         currentValue.substring(selectionEnd);
+                                                         
+                                        updateBlockValue(si, bi, newValue);
+                                        
+                                        const newCursorPos = selectionStart + formatted.length;
+                                        setTimeout(() => {
+                                          if (target) {
+                                            target.selectionStart = newCursorPos;
+                                            target.selectionEnd = newCursorPos;
+                                          }
+                                        }, 0);
+                                      }
+                                    }
+                                  }}
+                                />
+                              </Stack>
                             )}
 
                             {block.type === 'image' && (

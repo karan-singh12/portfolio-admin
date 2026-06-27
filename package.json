@@ -21,6 +21,7 @@
     "@tabler/icons-react": "^3.20.0",
     "axios": "^1.7.0",
     "dayjs": "^1.11.13",
+    "js-beautify": "^1.15.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.52.0",
